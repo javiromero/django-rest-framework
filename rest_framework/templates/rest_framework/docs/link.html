@@ -29,7 +29,10 @@
         </thead>
         <tbody>
             {% for field in link.fields|with_location:'path' %}
-            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td></tr>
+            <tr>
+                <td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td>
+                <td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -71,7 +74,11 @@
         </thead>
         <tbody>
             {% for field in link.fields|with_location:'body' %}
-            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td></tr>
+            <tr>
+                <td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td>
+                <td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td>
+                <td>{{ field.schema }}</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
@@ -80,11 +87,46 @@
     <p>The request body should be a <code>"{{ link.encoding }}"</code> encoded object, containing the following&nbsp;items.</p>
     <table class="parameters table table-bordered table-striped">
         <thead>
-            <tr><th>Parameter</th><th>Description</th></tr>
+            <tr><th>Parameter</th><th>Description</th><th>Type</th></tr>
         </thead>
         <tbody>
             {% for field in link.fields|with_location:'form' %}
-            <tr><td class="parameter-name"><code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}</td><td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td></tr>
+            <tr>
+                <td class="parameter-name">
+                    <code>{{ field.name }}</code>{% if field.required %} <span class="label label-warning">required</span>{% endif %}
+                </td>
+                <td>{% if field.schema.description %}{{ field.schema.description }}{% endif %}</td>
+                <td>{{ field.schema|schema_type }}</td>
+                {% if field.schema.properties %}
+                    {% for name, nested_field in field.schema.properties.iteritems %}
+                        <tr>
+                            <td class="parameter-name" style="padding-left: 25px;">
+                                <code>{{ name }}</code>{% if nested_field.required %} <span class="label label-warning">required</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if nested_field.schema.description %}{{ nested_field.schema.description }}{% endif %}
+                            </td>
+                            <td>
+                              {{ nested_field|schema_type }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% elif field.schema.items %}
+                    {% for name, nested_field in field.schema.items.properties.iteritems %}
+                        <tr>
+                            <td class="parameter-name" style="padding-left: 25px;">
+                                <code>{{ name }}</code>{% if nested_field.required %} <span class="label label-warning">required</span>{% endif %}
+                            </td>
+                            <td>
+                                {% if nested_field.schema.description %}{{ nested_field.schema.description }}{% endif %}
+                            </td>
+                            <td>
+                              {{ nested_field|schema_type }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                {% endif %}
+            </tr>
             {% endfor %}
         </tbody>
     </table>
