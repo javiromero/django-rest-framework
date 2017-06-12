@@ -49,6 +49,9 @@ def with_location(fields, location):
         if field.location == location
     ]
 
+@register.filter()
+def schema_type(field):
+    return field.__class__.__name__
 
 @register.simple_tag
 def form_for_link(link):
